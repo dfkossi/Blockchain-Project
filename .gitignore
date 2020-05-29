@@ -1,0 +1,6 @@
+cryptogen
+chaincode/chaincode.test
+chaincode/chaincode
+*.sum
+*.mod
+
