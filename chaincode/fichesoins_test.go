@@ -8,7 +8,7 @@ import (
 )
 
 func checkCreateNewFicheSoins(f *testing.T, stub *shim.MockStub, idFiche string, idContrat string,
-	idCompagnieAssurance string, idHopital string, codeAcheteurAssurance string, dateDebut datetime, dateFin datetime,
+	idCompagnieAssurance string, idHopital string, codeAcheteurAssurance string, dateDebut string, dateFin string,
 	fichierSoins string, signatureAcheteur string, signatureCompagnie string, signatureHopital string) {
 	displayNewTest("Create FicheSoins Test When FicheSoins does not exist")
 
@@ -17,7 +17,7 @@ func checkCreateNewFicheSoins(f *testing.T, stub *shim.MockStub, idFiche string,
 		[]byte(dateFin), []byte(fichierSoins), []byte(signatureAcheteur), []byte(signatureCompagnie), []byte(signatureHopital)})
 
 	if response.Status != shim.OK || response.Payload == nil {
-		t.Fail()
+		f.Fail()
 	}
 }
 
@@ -37,18 +37,20 @@ func checkGetExistingFicheSoins(f *testing.T, stub *shim.MockStub, idFiche strin
 	}
 }
 
-func TestCreateFicheSoins(f *testing.T) {
+func TestCreateFicheSoins(t *testing.T) {
 	scc := new(ProjetAssurance)
 	stub := shim.NewMockStub("ex02", scc)
 
-	checkCreateNewFicheSoins(f, stub, "O0", "SCHAIN", "Scorechain", "ISP")
+	checkCreateNewFicheSoins(t, stub, "O0", "SCHAIN", "Scorechain", "ISP", "SCHAIN",
+		"SCHAIN", "Scorechain", "ISP", "Scorechain", "ISP", "UU")
 	/* checkCreateNewOrganization(t, stub, "O0", "SCHAIN", "Scorechain", "ISP") */
 }
 
-func TestGetFicheSoinsByKey(f *testing.T) {
+func TestGetFicheSoinsByKey(t *testing.T) {
 	scc := new(ProjetAssurance)
 	stub := shim.NewMockStub("ex02", scc)
 
-	checkCreateNewFicheSoins(t, stub, "O0", "SCHAIN", "Scorechain", "ISP")
+	checkCreateNewFicheSoins(t, stub, "O0", "SCHAIN", "Scorechain", "ISP", "SCHAIN",
+		"SCHAIN", "Scorechain", "ISP", "Scorechain", "ISP", "UU")
 	checkGetExistingFicheSoins(t, stub, "O0")
 }

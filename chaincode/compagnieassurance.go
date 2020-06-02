@@ -13,7 +13,7 @@ import (
 //CompagnieAssurance declaration of the struct
 type CompagnieAssurance struct {
 	ObjectType string
-	Code       string
+	UUID       string
 	Nom        string
 	Contact    string
 	Adresse    string
@@ -33,13 +33,14 @@ func makeBytesFromCompagnieAssurance(stub shim.ChaincodeStubInterface, compagnie
 }
 
 //CreateCompagnieAssuranceOnLedger to create an CompagnieAssurance on ledger
-func CreateCompagnieAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string,
+func CreateCompagnieAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, uuid string,
 	nom string, contact string, adresse string) []byte {
 
-	compagnieAssurance := CompagnieAssurance{objectType, code, nom, contact, adresse}
+	compagnieAssurance := CompagnieAssurance{objectType, uuid, nom, contact, adresse}
 	compagnieAssuranceAsJSONBytes := makeBytesFromCompagnieAssurance(stub, compagnieAssurance)
 
-	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, code, "compagnieAssurance")
+	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, uuid, "compagnieassurance")
+
 	putEntityInLedger(stub, uuidIndexKeyCompagnieAssurance, compagnieAssuranceAsJSONBytes)
 	return compagnieAssuranceAsJSONBytes
 
@@ -48,15 +49,18 @@ func CreateCompagnieAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectTy
 //CreateCompagnieAssurance Core creation
 func (t *CompagnieAssurance) CreateCompagnieAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	code := args[0]
+	uuid := args[0]
 	nom := args[1]
 	contact := args[2]
 	adresse := args[3]
 
-	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, code, "CompagnieAssurance")
-	compagnieAssurance := CreateCompagnieAssuranceOnLedger(stub, "CompagnieAssurance",
-		uuidIndexKeyCompagnieAssurance, nom, contact, adresse)
+	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, uuid, "compagnieassurance")
+	if checkEntityExist(stub, uuidIndexKeyCompagnieAssurance) == true {
+		return entityAlreadyExistMessage(stub, uuid, "compagnieassurance")
+	}
 
+	compagnieAssurance := CreateCompagnieAssuranceOnLedger(stub, "compagnieassurance",
+		uuid, nom, contact, adresse)
 	return succeed(stub, "CompagnieAssuranceCreated", compagnieAssurance)
 }
 
@@ -66,9 +70,9 @@ func (t *CompagnieAssurance) GetCompagnieAssuranceByID(stub shim.ChaincodeStubIn
 
 	uuid := args
 
-	uuidIndexKey := createIndexKey(stub, uuid, "compagnieAssurance")
+	uuidIndexKey := createIndexKey(stub, uuid, "compagnieassurance")
 	if checkEntityExist(stub, uuidIndexKey) == false {
-		return entityNotFoundMessage(stub, uuid, "compagnieAssurance")
+		return entityNotFoundMessage(stub, uuid, "compagnieassurance")
 	}
 	compagnieAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
 

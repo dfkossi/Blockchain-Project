@@ -11,6 +11,7 @@ import (
 //ProjetAssurance principal chaincode class
 type ProjetAssurance struct {
 	compagnieAssurance CompagnieAssurance
+	hopital            Hopital
 }
 
 //Init function to Initiate the chaincode
@@ -47,6 +48,13 @@ func (t *ProjetAssurance) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 
 	case strings.Compare(fc, "GetCompagnieAssuranceByID") == 0:
 		return t.compagnieAssurance.GetCompagnieAssuranceByID(stub, args[0])
+
+		// HOPITAL
+	case strings.Compare(fc, "CreateHopital") == 0:
+		return t.hopital.CreateHopital(stub, args)
+
+	/* case strings.Compare(fc, "GetCompagnieAssuranceByID") == 0:
+	return t.compagnieAssurance.GetCompagnieAssuranceByID(stub, args[0]) */
 
 	default:
 		return shim.Error("Called function is not defined in the chaincode ")

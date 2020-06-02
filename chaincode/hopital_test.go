@@ -7,7 +7,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func checkCreateNewHopital(h *testing.T, stub *shim.MockStub, code string,
+func checkCreateNewHopital(t *testing.T, stub *shim.MockStub, code string,
 	nom string, contact string, adresse string) {
 	displayNewTest("Create Hopital Test When Hopital does not exist")
 
@@ -15,11 +15,11 @@ func checkCreateNewHopital(h *testing.T, stub *shim.MockStub, code string,
 		[]byte(code), []byte(nom), []byte(contact), []byte(adresse)})
 
 	if response.Status != shim.OK || response.Payload == nil {
-		h.Fail()
+		t.Fail()
 	}
 }
 
-func checkGetExistingHopital(f *testing.T, stub *shim.MockStub, code string) {
+func checkGetExistingHopital(t *testing.T, stub *shim.MockStub, code string) {
 	displayNewTest("Get Existing Hopital " + code + " From Ledger Test")
 
 	response := stub.MockInvoke("1", [][]byte{[]byte("GetHopitalByID"), []byte(code)})

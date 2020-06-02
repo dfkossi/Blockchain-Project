@@ -8,7 +8,7 @@ import (
 )
 
 func checkCreateNewContratAssurance(c *testing.T, stub *shim.MockStub, idContrat string, idCompagnieAssurance string,
-	codeAcheteurAssurance string, dateDebut datetime, dateFin datetime, fichierContrat string, signatureAcheteur string, signatureCompagnie string) {
+	codeAcheteurAssurance string, dateDebut string, dateFin string, fichierContrat string, signatureAcheteur string, signatureCompagnie string) {
 
 	displayNewTest("Create ContratAssurance Test When ContratAssurance does not exist")
 

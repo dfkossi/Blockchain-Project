@@ -1,44 +1,48 @@
-package main 
+package main
 
-import {
+import (
 	"encoding/json"
 	"fmt"
-	
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-}
+)
 
 type ContratAssurance struct {
-	IdContrat string
-	IdCompagnieAssurance string
+	ObjectType            string
+	IdContrat             string
+	IdCompagnieAssurance  string
 	CodeAcheteurAssurance string
-	DateDebut datetime
-	DateFin datetime
-	FichierContrat string
-	SignatureAcheteur string
-	SignatureCompagnie string
+	DateDebut             string
+	DateFin               string
+	FichierContrat        string
+	SignatureAcheteur     string
+	SignatureCompagnie    string
 }
 
-func makeContratAssuranceFromBytes(stub.ChaincodeStubInterface, bytes []byte) ContratAssurance {
-	asset := ContratAssurance()
+func makeContratAssuranceFromBytes(stub shim.ChaincodeStubInterface, bytes []byte) ContratAssurance {
+	contratAssurance := ContratAssurance{}
 	err := json.Unmarshal(bytes, &contratAssurance)
 	panicErr(err)
 	return contratAssurance
 }
 
-func makeBytesFromAsset(stub shim.ChaincodeStubInterface, contratAssurance ContratAssurance) []byte {
+func makeBytesFromContratAssurance(stub shim.ChaincodeStubInterface, contratAssurance ContratAssurance) []byte {
 	bytes, err := json.Marshal(contratAssurance)
 	panicErr(err)
 	return bytes
 }
 
-func createAssetOnLedger(stub shim.ChaincodeStubInterface, objectType string, idContrat string, idCompagnieAssurance string, codeAcheteurAssurance string, dateDebut datetime, dateFin datetime, fichierContrat string, signatureAcheteur string, signatureCompagnie string) {
-	
-	contratAssurance := ContratAssurance(objectType, idContrat, idCompagnieAssurance, codeAcheteurAssurance, dateDebut, dateFin, fichierContrat, signatureAcheteur, signatureCompagnie)
-	contratAssuranceAsJSONBytes := makeBytesFromAsset(stub, contratAssurance)
+func CreateContratAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, idContrat string,
+	idCompagnieAssurance string, codeAcheteurAssurance string, dateDebut string,
+	dateFin string, fichierContrat string, signatureAcheteur string, signatureCompagnie string) []byte {
 
-	uuidIdexKeyContratAssurance := createIndexKey(stub, idContrat, "asset")
-	//putEntityInLedger(stub, uuidIdexKeyContratAssurance, contratAssuranceAsJSONBytes)
+	contratAssurance := ContratAssurance{objectType, idContrat, idCompagnieAssurance, codeAcheteurAssurance,
+		dateDebut, dateFin, fichierContrat, signatureAcheteur, signatureCompagnie}
+	contratAssuranceAsJSONBytes := makeBytesFromContratAssurance(stub, contratAssurance)
+
+	uuidIndexKeyContratAssurance := createIndexKey(stub, idContrat, "asset")
+	putEntityInLedger(stub, uuidIndexKeyContratAssurance, contratAssuranceAsJSONBytes)
 	return contratAssuranceAsJSONBytes
 }
 
@@ -52,15 +56,15 @@ func (c *ContratAssurance) CreateContactAssurance(stub shim.ChaincodeStubInterfa
 	dateFin := args[0]
 	fichierContrat := args[0]
 	signatureAcheteur := args[0]
-	signatureCompagnie:= args[0]
+	signatureCompagnie := args[0]
 
 	uuidIndexKeyContratAssurance := createIndexKey(stub, idContrat, "ContratAssurance")
 	contratAssurance := CreateContratAssuranceOnLedger(stub, "ContratAssurance",
-		uuidIndexKeyContratAssurance, idCompagnieAssurance, codeAcheteurAssurance, dateDebut, dateFin, fichierContrat, signatureAcheteur, signatureCompagnie)
+		uuidIndexKeyContratAssurance, idCompagnieAssurance, codeAcheteurAssurance, dateDebut, dateFin,
+		fichierContrat, signatureAcheteur, signatureCompagnie)
 
 	return succeed(stub, "Contrat Assurance Created", contratAssurance)
 }
-
 
 //GetContratAssuranceByID method to get an asset by id
 func (t *AcheteurAssurance) GetAContratAssuranceByID(stub shim.ChaincodeStubInterface, args string) pb.Response {

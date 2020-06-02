@@ -1,23 +1,24 @@
-package main 
+package main
 
-import {
+import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-}
+)
 
+//Hopital declaration of structure
 type Hopital struct {
 	ObjectType string
-	Code string
-	Nom string
-	Contact string
-	Adresse string
+	Code       string
+	Nom        string
+	Contact    string
+	Adresse    string
 }
 
-func makeHopitalFromBytes(stub.ChaincodeStubInterface, bytes []byte) Hopital {
-	hopital := Hopital()
+func makeHopitalFromBytes(stub shim.ChaincodeStubInterface, bytes []byte) Hopital {
+	hopital := Hopital{}
 	err := json.Unmarshal(bytes, &hopital)
 	panicErr(err)
 	return hopital
@@ -30,13 +31,15 @@ func makeBytesFromHopital(stub shim.ChaincodeStubInterface, hopital Hopital) []b
 }
 
 //CreateHopitalOnLedger to create an Hopital on ledger
-func createHopitalOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string, nom string, contact string, adresse string) {
-	
-	hopital := Hopital(objectType, code, nom, contact, adresse)
+func CreateHopitalOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string,
+	nom string, contact string, adresse string) []byte {
+
+	hopital := Hopital{objectType, code, nom, contact, adresse}
 	hopitalAsJSONBytes := makeBytesFromHopital(stub, hopital)
 
 	uuidIdexKeyHopital := createIndexKey(stub, code, "hopital")
 	putEntityInLedger(stub, uuidIdexKeyHopital, hopitalAsJSONBytes)
+	return hopitalAsJSONBytes
 }
 
 //CreateHopital Core creation
@@ -67,4 +70,3 @@ func (h *Hopital) GetHopitalByID(stub shim.ChaincodeStubInterface, args string) 
 
 	return shim.Success(hopitalAsBytes)
 }
-

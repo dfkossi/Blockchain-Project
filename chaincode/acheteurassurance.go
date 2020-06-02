@@ -1,25 +1,25 @@
-package main 
+package main
 
-import {
+import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-}
+)
 
 type AcheteurAssurance struct {
 	ObjectType string
-	Code string
-	Nom string
-	Contact string
-	Adresse string
+	Code       string
+	Nom        string
+	Contact    string
+	Adresse    string
 	PassportID string
-	VisaID string
+	VisaID     string
 }
 
-func makeAcheteurAssuranceFromBytes(stub.ChaincodeStubInterface, bytes []byte) AcheteurAssurance {
-	acheteurAssurance := AcheteurAssurance()
+func makeAcheteurAssuranceFromBytes(stub shim.ChaincodeStubInterface, bytes []byte) AcheteurAssurance {
+	acheteurAssurance := AcheteurAssurance{}
 	err := json.Unmarshal(bytes, &acheteurAssurance)
 	panicErr(err)
 	return acheteurAssurance
@@ -32,9 +32,10 @@ func makeBytesFromAcheteurAssurance(stub shim.ChaincodeStubInterface, acheteurAs
 }
 
 //CreateAcheteurAssuranceOnLedger to create an AcheteurAssurance on ledger
-func createAcheteurAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string, nom string, contact string, adresse string, passportid string, visaid string) []byte {
-	
-	acheteurAssurance := AcheteurAssurance(objectType, code, nom, contact, adresse, passportid, visaid)
+func CreateAcheteurAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string,
+	nom string, contact string, adresse string, passportid string, visaid string) []byte {
+
+	acheteurAssurance := AcheteurAssurance{objectType, code, nom, contact, adresse, passportid, visaid}
 	acheteurAssuranceAsJSONBytes := makeBytesFromAcheteurAssurance(stub, acheteurAssurance)
 
 	uuidIdexKeyAcheteurAssurance := createIndexKey(stub, code, "acheteurAssurance")
@@ -46,11 +47,11 @@ func createAcheteurAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectTyp
 func (a *AcheteurAssurance) CreateAcheteurAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	code := args[0]
-	nom := args[0]
-	contact := args[0]
-	adresse := args[0]
-	passportid := args[0]
-	visaid := args[0]
+	nom := args[1]
+	contact := args[2]
+	adresse := args[3]
+	passportid := args[4]
+	visaid := args[5]
 
 	uuidIndexKeyAcheteurAssurance := createIndexKey(stub, code, "AcheteurAssurance")
 	acheteurAssurance := CreateAcheteurAssuranceOnLedger(stub, "AcheteurAssurance",

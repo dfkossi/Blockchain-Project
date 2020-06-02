@@ -18,6 +18,7 @@ func panicErr(err error) {
 
 func putEntityInLedger(stub shim.ChaincodeStubInterface, uuid string, payload []byte) {
 	/* creatorID := getTransactionCreator(stub) */
+
 	err := stub.PutState(uuid, payload)
 	panicErr(err)
 	fmt.Println("Put entity " + uuid + " in ledger")
@@ -61,6 +62,7 @@ func succeed(stub shim.ChaincodeStubInterface, eventMessage string, eventPayload
 }
 
 func createIndexKey(stub shim.ChaincodeStubInterface, uuid string, objectType string) string {
+
 	indexName := "objectType~uuid"
 	uuidIndexKey, err := stub.CreateCompositeKey(indexName, []string{objectType, uuid})
 	panicErr(err)
