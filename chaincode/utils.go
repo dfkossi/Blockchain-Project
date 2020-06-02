@@ -99,8 +99,10 @@ func entityAlreadyExistMessage(stub shim.ChaincodeStubInterface, uuid string, ob
 	switch objectType {
 	case "compagnieassurance":
 		errorType = "compagnieAssuranceAlreadyExist"
-		/* case "compagnieAssurance":
-		errorType = "compagnieAssuranceAlreadyExist" */
+	/* case "compagnieAssurance":
+	errorType = "compagnieAssuranceAlreadyExist" */
+	case "hopital":
+		errorType = "hopitalAlreadyExist"
 	}
 
 	err := NewFunctionnalError(errorType, errorMessage)
@@ -112,7 +114,7 @@ func entityNotFoundMessage(stub shim.ChaincodeStubInterface, uuid string, object
 	errorMessage := objectType + " with uuid " + uuid + " not found in the ledger."
 	errorType := ""
 	switch objectType {
-	case "organization":
+	case "compagnieassurance":
 		errorType = "noCompagnieAssuranceFound"
 		/* case "organizations":
 		errorType = "noOrganizationFound" */

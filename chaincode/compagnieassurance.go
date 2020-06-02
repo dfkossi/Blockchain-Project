@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	//_ "utils.go"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -24,7 +26,7 @@ func makeCompagnieAssuranceFromBytes(stub shim.ChaincodeStubInterface, bytes []b
 	return compagnieAssurance
 }
 
-func makeBytesFromOrganization(stub shim.ChaincodeStubInterface, compagnieAssurance CompagnieAssurance) []byte {
+func makeBytesFromCompagnieAssurance(stub shim.ChaincodeStubInterface, compagnieAssurance CompagnieAssurance) []byte {
 	bytes, err := json.Marshal(compagnieAssurance)
 	panicErr(err)
 	return bytes
@@ -35,9 +37,9 @@ func CreateCompagnieAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectTy
 	nom string, contact string, adresse string) []byte {
 
 	compagnieAssurance := CompagnieAssurance{objectType, code, nom, contact, adresse}
-	compagnieAssuranceAsJSONBytes := makeBytesFromOrganization(stub, compagnieAssurance)
+	compagnieAssuranceAsJSONBytes := makeBytesFromCompagnieAssurance(stub, compagnieAssurance)
 
-	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, code, "organization")
+	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, code, "compagnieAssurance")
 	putEntityInLedger(stub, uuidIndexKeyCompagnieAssurance, compagnieAssuranceAsJSONBytes)
 	return compagnieAssuranceAsJSONBytes
 
@@ -47,9 +49,9 @@ func CreateCompagnieAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectTy
 func (t *CompagnieAssurance) CreateCompagnieAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	code := args[0]
-	nom := args[0]
-	contact := args[0]
-	adresse := args[0]
+	nom := args[1]
+	contact := args[2]
+	adresse := args[3]
 
 	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, code, "CompagnieAssurance")
 	compagnieAssurance := CreateCompagnieAssuranceOnLedger(stub, "CompagnieAssurance",
@@ -58,17 +60,17 @@ func (t *CompagnieAssurance) CreateCompagnieAssurance(stub shim.ChaincodeStubInt
 	return succeed(stub, "CompagnieAssuranceCreated", compagnieAssurance)
 }
 
-//GetCompagnieAssuranceByID method to get an organization by id
+//GetCompagnieAssuranceByID method to get an compagnieAssurance by id
 func (t *CompagnieAssurance) GetCompagnieAssuranceByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
 	fmt.Println("\n GetCompagnieAssuranceByID - Start", args)
 
 	uuid := args
 
-	uuidIndexKey := createIndexKey(stub, uuid, "organization")
+	uuidIndexKey := createIndexKey(stub, uuid, "compagnieAssurance")
 	if checkEntityExist(stub, uuidIndexKey) == false {
-		return entityNotFoundMessage(stub, uuid, "organization")
+		return entityNotFoundMessage(stub, uuid, "compagnieAssurance")
 	}
-	organizationAsBytes := getEntityFromLedger(stub, uuidIndexKey)
+	compagnieAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
 
-	return shim.Success(organizationAsBytes)
+	return shim.Success(compagnieAssuranceAsBytes)
 }
