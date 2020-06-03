@@ -7,33 +7,33 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func checkCreateNewFicheSoins(f *testing.T, stub *shim.MockStub, idFiche string, idContrat string,
-	idCompagnieAssurance string, idHopital string, codeAcheteurAssurance string, dateDebut string, dateFin string,
-	fichierSoins string, signatureAcheteur string, signatureCompagnie string, signatureHopital string) {
+func checkCreateNewFicheSoins(t *testing.T, stub *shim.MockStub, uuid string, iDContrat string,
+	iDCompagnieAssurance string, iDHopital string, codeAcheteurAssurance string, dateDebut string, dateFin string,
+	ficheSoinsPDF string, signatureAcheteur string, signatureCompagnie string, signatureHopital string) {
 	displayNewTest("Create FicheSoins Test When FicheSoins does not exist")
 
 	response := stub.MockInvoke("1", [][]byte{[]byte("CreateFicheSoins"),
-		[]byte(idFiche), []byte(idContrat), []byte(idCompagnieAssurance), []byte(idHopital), []byte(codeAcheteurAssurance), []byte(dateDebut),
-		[]byte(dateFin), []byte(fichierSoins), []byte(signatureAcheteur), []byte(signatureCompagnie), []byte(signatureHopital)})
+		[]byte(uuid), []byte(iDContrat), []byte(iDCompagnieAssurance), []byte(iDHopital), []byte(codeAcheteurAssurance), []byte(dateDebut),
+		[]byte(dateFin), []byte(ficheSoinsPDF), []byte(signatureAcheteur), []byte(signatureCompagnie), []byte(signatureHopital)})
 
 	if response.Status != shim.OK || response.Payload == nil {
-		f.Fail()
+		t.Fail()
 	}
 }
 
-func checkGetExistingFicheSoins(f *testing.T, stub *shim.MockStub, idFiche string) {
-	displayNewTest("Get Existing FicheSoins " + idFiche + " From Ledger Test")
+func checkGetExistingFicheSoins(t *testing.T, stub *shim.MockStub, uuid string) {
+	displayNewTest("Get Existing FicheSoins " + uuid + " From Ledger Test")
 
-	response := stub.MockInvoke("1", [][]byte{[]byte("GetFicheSoinsByID"), []byte(idFiche)})
+	response := stub.MockInvoke("1", [][]byte{[]byte("GetFicheSoinsByID"), []byte(uuid)})
 	if response.Status != shim.OK || response.Payload == nil {
-		f.Fail()
+		t.Fail()
 	}
 
 	ass := FicheSoins{}
 	_ = json.Unmarshal(response.Payload, &ass)
 
-	if ass.IdFiche != idFiche {
-		f.Fail()
+	if ass.UUID != uuid {
+		t.Fail()
 	}
 }
 
@@ -43,7 +43,9 @@ func TestCreateFicheSoins(t *testing.T) {
 
 	checkCreateNewFicheSoins(t, stub, "O0", "SCHAIN", "Scorechain", "ISP", "SCHAIN",
 		"SCHAIN", "Scorechain", "ISP", "Scorechain", "ISP", "UU")
-	/* checkCreateNewOrganization(t, stub, "O0", "SCHAIN", "Scorechain", "ISP") */
+	checkGetExistingFicheSoins(t, stub, "O0")
+	checkCreateNewFicheSoins(t, stub, "O0", "SCHAIN", "Scorechain", "ISP", "SCHAIN",
+		"SCHAIN", "Scorechain", "ISP", "Scorechain", "ISP", "UU")
 }
 
 func TestGetFicheSoinsByKey(t *testing.T) {

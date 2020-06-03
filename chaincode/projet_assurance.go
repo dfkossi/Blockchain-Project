@@ -11,7 +11,10 @@ import (
 //ProjetAssurance principal chaincode class
 type ProjetAssurance struct {
 	compagnieAssurance CompagnieAssurance
+	acheteurAssurance  AcheteurAssurance
+	contratAssurance   ContratAssurance
 	hopital            Hopital
+	ficheSoins         FicheSoins
 }
 
 //Init function to Initiate the chaincode
@@ -49,12 +52,33 @@ func (t *ProjetAssurance) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	case strings.Compare(fc, "GetCompagnieAssuranceByID") == 0:
 		return t.compagnieAssurance.GetCompagnieAssuranceByID(stub, args[0])
 
-		// HOPITAL
+	// ACHETEURASSURANCE
+	case strings.Compare(fc, "CreateAcheteurAssurance") == 0:
+		return t.acheteurAssurance.CreateAcheteurAssurance(stub, args)
+
+	/*case strings.Compare(fc, "GetAcheteurAssuranceByID") == 0:
+	return t.acheteurAssurance.GetAcheteurAssuranceByID(stub, args[0])*/
+
+	// CONTRATASSURANCE
+	case strings.Compare(fc, "CreateContratAssurance") == 0:
+		return t.contratAssurance.CreateContratAssurance(stub, args)
+
+	case strings.Compare(fc, "GetContratAssuranceByID") == 0:
+		return t.contratAssurance.GetContratAssuranceByID(stub, args[0])
+
+	// HOPITAL
 	case strings.Compare(fc, "CreateHopital") == 0:
 		return t.hopital.CreateHopital(stub, args)
 
-	/* case strings.Compare(fc, "GetCompagnieAssuranceByID") == 0:
-	return t.compagnieAssurance.GetCompagnieAssuranceByID(stub, args[0]) */
+	case strings.Compare(fc, "GetHopitalByID") == 0:
+		return t.hopital.GetHopitalByID(stub, args[0])
+
+	// FICHESOINS
+	case strings.Compare(fc, "CreateFicheSoins") == 0:
+		return t.ficheSoins.CreateFicheSoins(stub, args)
+
+	case strings.Compare(fc, "GetFicheSoinsByID") == 0:
+		return t.ficheSoins.GetFicheSoinsByID(stub, args[0])
 
 	default:
 		return shim.Error("Called function is not defined in the chaincode ")

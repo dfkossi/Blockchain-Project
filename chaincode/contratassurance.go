@@ -8,14 +8,15 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+//ContratAssurance declaration of the struct
 type ContratAssurance struct {
 	ObjectType            string
-	IdContrat             string
-	IdCompagnieAssurance  string
+	UUID                  string
+	IDCompagnieAssurance  string
 	CodeAcheteurAssurance string
 	DateDebut             string
 	DateFin               string
-	FichierContrat        string
+	ContratAssurancePDF   string
 	SignatureAcheteur     string
 	SignatureCompagnie    string
 }
@@ -33,50 +34,56 @@ func makeBytesFromContratAssurance(stub shim.ChaincodeStubInterface, contratAssu
 	return bytes
 }
 
-func CreateContratAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, idContrat string,
-	idCompagnieAssurance string, codeAcheteurAssurance string, dateDebut string,
-	dateFin string, fichierContrat string, signatureAcheteur string, signatureCompagnie string) []byte {
+//CreateContratAssuranceOnLedger to create an CompagnieAssurance on ledger
+func CreateContratAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, uuid string,
+	iDCompagnieAssurance string, codeAcheteurAssurance string, dateDebut string,
+	dateFin string, contratAssurancePDF string, signatureAcheteur string, signatureCompagnie string) []byte {
 
-	contratAssurance := ContratAssurance{objectType, idContrat, idCompagnieAssurance, codeAcheteurAssurance,
-		dateDebut, dateFin, fichierContrat, signatureAcheteur, signatureCompagnie}
+	contratAssurance := ContratAssurance{objectType, uuid, iDCompagnieAssurance, codeAcheteurAssurance,
+		dateDebut, dateFin, contratAssurancePDF, signatureAcheteur, signatureCompagnie}
 	contratAssuranceAsJSONBytes := makeBytesFromContratAssurance(stub, contratAssurance)
 
-	uuidIndexKeyContratAssurance := createIndexKey(stub, idContrat, "asset")
+	uuidIndexKeyContratAssurance := createIndexKey(stub, uuid, "contratassurance")
+
 	putEntityInLedger(stub, uuidIndexKeyContratAssurance, contratAssuranceAsJSONBytes)
 	return contratAssuranceAsJSONBytes
 }
 
 //CreateContratAssurance Core creation
-func (c *ContratAssurance) CreateContactAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *ContratAssurance) CreateContratAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	idContrat := args[0]
-	idCompagnieAssurance := args[0]
-	codeAcheteurAssurance := args[0]
-	dateDebut := args[0]
-	dateFin := args[0]
-	fichierContrat := args[0]
-	signatureAcheteur := args[0]
-	signatureCompagnie := args[0]
+	uuid := args[0]
+	iDCompagnieAssurance := args[1]
+	codeAcheteurAssurance := args[2]
+	dateDebut := args[3]
+	dateFin := args[4]
+	contratAssurancePDF := args[5]
+	signatureAcheteur := args[6]
+	signatureCompagnie := args[7]
 
-	uuidIndexKeyContratAssurance := createIndexKey(stub, idContrat, "ContratAssurance")
-	contratAssurance := CreateContratAssuranceOnLedger(stub, "ContratAssurance",
-		uuidIndexKeyContratAssurance, idCompagnieAssurance, codeAcheteurAssurance, dateDebut, dateFin,
-		fichierContrat, signatureAcheteur, signatureCompagnie)
+	uuidIndexKeyContratAssurance := createIndexKey(stub, uuid, "contratassurance")
+	if checkEntityExist(stub, uuidIndexKeyContratAssurance) == true {
+		return entityAlreadyExistMessage(stub, uuid, "contratassurance")
+	}
 
-	return succeed(stub, "Contrat Assurance Created", contratAssurance)
+	contratAssurance := CreateContratAssuranceOnLedger(stub, "contratassurance",
+		uuid, iDCompagnieAssurance, codeAcheteurAssurance, dateDebut, dateFin,
+		contratAssurancePDF, signatureAcheteur, signatureCompagnie)
+
+	return succeed(stub, "ContratAssuranceCreated", contratAssurance)
 }
 
-//GetContratAssuranceByID method to get an asset by id
-func (t *AcheteurAssurance) GetAContratAssuranceByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
+//GetContratAssuranceByID method to get an contratAssurance by id
+func (t *ContratAssurance) GetContratAssuranceByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
 	fmt.Println("\n GetContratAssuranceByID - Start", args)
 
 	uuid := args
 
-	uuidIndexKey := createIndexKey(stub, uuid, "asset")
+	uuidIndexKey := createIndexKey(stub, uuid, "contratassurance")
 	if checkEntityExist(stub, uuidIndexKey) == false {
-		return entityNotFoundMessage(stub, uuid, "asset")
+		return entityNotFoundMessage(stub, uuid, "contratassurance")
 	}
-	assetAsBytes := getEntityFromLedger(stub, uuidIndexKey)
+	contratAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
 
-	return shim.Success(assetAsBytes)
+	return shim.Success(contratAssuranceAsBytes)
 }

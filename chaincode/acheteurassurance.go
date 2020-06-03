@@ -8,9 +8,10 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+//AcheteurAssurance declaration of the struct
 type AcheteurAssurance struct {
 	ObjectType string
-	Code       string
+	UUID       string
 	Nom        string
 	Contact    string
 	Adresse    string
@@ -32,36 +33,41 @@ func makeBytesFromAcheteurAssurance(stub shim.ChaincodeStubInterface, acheteurAs
 }
 
 //CreateAcheteurAssuranceOnLedger to create an AcheteurAssurance on ledger
-func CreateAcheteurAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string,
+func CreateAcheteurAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, uuid string,
 	nom string, contact string, adresse string, passportid string, visaid string) []byte {
 
-	acheteurAssurance := AcheteurAssurance{objectType, code, nom, contact, adresse, passportid, visaid}
+	acheteurAssurance := AcheteurAssurance{objectType, uuid, nom, contact, adresse, passportid, visaid}
 	acheteurAssuranceAsJSONBytes := makeBytesFromAcheteurAssurance(stub, acheteurAssurance)
 
-	uuidIdexKeyAcheteurAssurance := createIndexKey(stub, code, "acheteurAssurance")
+	uuidIdexKeyAcheteurAssurance := createIndexKey(stub, uuid, "acheteurassurance")
+
 	putEntityInLedger(stub, uuidIdexKeyAcheteurAssurance, acheteurAssuranceAsJSONBytes)
 	return acheteurAssuranceAsJSONBytes
 }
 
 //CreateAcheteurAssurance Core creation
-func (a *AcheteurAssurance) CreateAcheteurAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *AcheteurAssurance) CreateAcheteurAssurance(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	code := args[0]
+	uuid := args[0]
 	nom := args[1]
 	contact := args[2]
 	adresse := args[3]
 	passportid := args[4]
 	visaid := args[5]
 
-	uuidIndexKeyAcheteurAssurance := createIndexKey(stub, code, "AcheteurAssurance")
-	acheteurAssurance := CreateAcheteurAssuranceOnLedger(stub, "AcheteurAssurance",
-		uuidIndexKeyAcheteurAssurance, nom, contact, adresse, passportid, visaid)
+	uuidIndexKeyAcheteurAssurance := createIndexKey(stub, uuid, "AcheteurAssurance")
+	if checkEntityExist(stub, uuidIndexKeyAcheteurAssurance) == true {
+		return entityAlreadyExistMessage(stub, uuid, "acheteurassurance")
+	}
 
-	return succeed(stub, "Acheteur Assurance Created", acheteurAssurance)
+	acheteurAssurance := CreateAcheteurAssuranceOnLedger(stub, "acheteurassurance",
+		uuid, nom, contact, adresse, passportid, visaid)
+
+	return succeed(stub, "AcheteurAssuranceCreated", acheteurAssurance)
 }
 
 //GetAcheteurAssuranceByID method to get an acheteurAssurance by id
-func (a *AcheteurAssurance) GetAcheteurAssuranceByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
+func (t *AcheteurAssurance) GetAcheteurAssuranceByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
 	fmt.Println("\n GetAcheteurAssuranceByID - Start", args)
 
 	uuid := args

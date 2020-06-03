@@ -11,7 +11,7 @@ import (
 //Hopital declaration of structure
 type Hopital struct {
 	ObjectType string
-	Code       string
+	UUID       string
 	Nom        string
 	Contact    string
 	Adresse    string
@@ -31,33 +31,37 @@ func makeBytesFromHopital(stub shim.ChaincodeStubInterface, hopital Hopital) []b
 }
 
 //CreateHopitalOnLedger to create an Hopital on ledger
-func CreateHopitalOnLedger(stub shim.ChaincodeStubInterface, objectType string, code string,
+func CreateHopitalOnLedger(stub shim.ChaincodeStubInterface, objectType string, uuid string,
 	nom string, contact string, adresse string) []byte {
 
-	hopital := Hopital{objectType, code, nom, contact, adresse}
+	hopital := Hopital{objectType, uuid, nom, contact, adresse}
 	hopitalAsJSONBytes := makeBytesFromHopital(stub, hopital)
 
-	uuidIdexKeyHopital := createIndexKey(stub, code, "hopital")
-	putEntityInLedger(stub, uuidIdexKeyHopital, hopitalAsJSONBytes)
+	uuidIndexKeyHopital := createIndexKey(stub, uuid, "hopital")
+
+	putEntityInLedger(stub, uuidIndexKeyHopital, hopitalAsJSONBytes)
 	return hopitalAsJSONBytes
 }
 
 //CreateHopital Core creation
-func (h *Hopital) CreateHopital(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *Hopital) CreateHopital(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	code := args[0]
-	nom := args[0]
-	contact := args[0]
-	adresse := args[0]
+	uuid := args[0]
+	nom := args[1]
+	contact := args[2]
+	adresse := args[3]
 
-	uuidIndexKeyHopital := createIndexKey(stub, code, "Hopital")
+	uuidIndexKeyHopital := createIndexKey(stub, uuid, "hopital")
+	if checkEntityExist(stub, uuidIndexKeyHopital) == true {
+		return entityAlreadyExistMessage(stub, uuid, "hopital")
+	}
+
 	hopital := CreateHopitalOnLedger(stub, "Hopital", uuidIndexKeyHopital, nom, contact, adresse)
-
 	return succeed(stub, "HopitalCreated", hopital)
 }
 
 //GetHopitalByID method to get an hopital by id
-func (h *Hopital) GetHopitalByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
+func (t *Hopital) GetHopitalByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
 	fmt.Println("\n GetHopitalByID - Start", args)
 
 	uuid := args

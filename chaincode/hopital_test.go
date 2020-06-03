@@ -7,22 +7,22 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func checkCreateNewHopital(t *testing.T, stub *shim.MockStub, code string,
+func checkCreateNewHopital(t *testing.T, stub *shim.MockStub, uuid string,
 	nom string, contact string, adresse string) {
 	displayNewTest("Create Hopital Test When Hopital does not exist")
 
 	response := stub.MockInvoke("1", [][]byte{[]byte("CreateHopital"),
-		[]byte(code), []byte(nom), []byte(contact), []byte(adresse)})
+		[]byte(uuid), []byte(nom), []byte(contact), []byte(adresse)})
 
 	if response.Status != shim.OK || response.Payload == nil {
 		t.Fail()
 	}
 }
 
-func checkGetExistingHopital(t *testing.T, stub *shim.MockStub, code string) {
-	displayNewTest("Get Existing Hopital " + code + " From Ledger Test")
+func checkGetExistingHopital(t *testing.T, stub *shim.MockStub, uuid string) {
+	displayNewTest("Get Existing Hopital " + uuid + " From Ledger Test")
 
-	response := stub.MockInvoke("1", [][]byte{[]byte("GetHopitalByID"), []byte(code)})
+	response := stub.MockInvoke("1", [][]byte{[]byte("GetHopitalByID"), []byte(uuid)})
 	if response.Status != shim.OK || response.Payload == nil {
 		t.Fail()
 	}
@@ -30,23 +30,24 @@ func checkGetExistingHopital(t *testing.T, stub *shim.MockStub, code string) {
 	org := Hopital{}
 	_ = json.Unmarshal(response.Payload, &org)
 
-	if org.Code != code {
+	if org.UUID != uuid {
 		t.Fail()
 	}
 }
 
-func TestCreateHopital(h *testing.T) {
+func TestCreateHopital(t *testing.T) {
 	scc := new(ProjetAssurance)
 	stub := shim.NewMockStub("ex02", scc)
 
-	checkCreateNewHopital(h, stub, "O0", "SCHAIN", "Scorechain", "ISP")
-	/* checkCreateNewOrganization(t, stub, "O0", "SCHAIN", "Scorechain", "ISP") */
+	checkCreateNewHopital(t, stub, "O0", "SCHAIN", "Scorechain", "ISP")
+	checkGetExistingCompagnieAssurance(t, stub, "O0")
+	checkCreateNewHopital(t, stub, "O0", "SCHAIN", "Scorechain", "ISP")
 }
 
-func TestGetHopitalByKey(h *testing.T) {
+func TestGetHopitalByKey(t *testing.T) {
 	scc := new(ProjetAssurance)
 	stub := shim.NewMockStub("ex02", scc)
 
-	checkCreateNewHopital(h, stub, "O0", "SCHAIN", "Scorechain", "ISP")
-	checkGetExistingHopital(h, stub, "O0")
+	checkCreateNewHopital(t, stub, "O0", "SCHAIN", "Scorechain", "ISP")
+	checkGetExistingHopital(t, stub, "O0")
 }

@@ -7,47 +7,48 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func checkCreateNewContratAssurance(c *testing.T, stub *shim.MockStub, idContrat string, idCompagnieAssurance string,
-	codeAcheteurAssurance string, dateDebut string, dateFin string, fichierContrat string, signatureAcheteur string, signatureCompagnie string) {
+func checkCreateNewContratAssurance(t *testing.T, stub *shim.MockStub, uuid string, iDCompagnieAssurance string,
+	codeAcheteurAssurance string, dateDebut string, dateFin string, contratAssurancePDF string, signatureAcheteur string, signatureCompagnie string) {
 
 	displayNewTest("Create ContratAssurance Test When ContratAssurance does not exist")
 
 	response := stub.MockInvoke("1", [][]byte{[]byte("CreateContratAssurance"),
-		[]byte(idContrat), []byte(idCompagnieAssurance), []byte(codeAcheteurAssurance), []byte(dateDebut), []byte(dateFin), []byte(fichierContrat), []byte(signatureAcheteur), []byte(signatureCompagnie)})
+		[]byte(uuid), []byte(iDCompagnieAssurance), []byte(codeAcheteurAssurance), []byte(dateDebut), []byte(dateFin), []byte(contratAssurancePDF), []byte(signatureAcheteur), []byte(signatureCompagnie)})
 
 	if response.Status != shim.OK || response.Payload == nil {
-		c.Fail()
+		t.Fail()
 	}
 }
 
-func checkGetExistingContratAssurance(c *testing.T, stub *shim.MockStub, idContrat string) {
-	displayNewTest("Get Existing ContratAssurance " + idContrat + " From Ledger Test")
+func checkGetExistingContratAssurance(t *testing.T, stub *shim.MockStub, uuid string) {
+	displayNewTest("Get Existing ContratAssurance " + uuid + " From Ledger Test")
 
-	response := stub.MockInvoke("1", [][]byte{[]byte("GetContratAssuranceByID"), []byte(idContrat)})
+	response := stub.MockInvoke("1", [][]byte{[]byte("GetContratAssuranceByID"), []byte(uuid)})
 	if response.Status != shim.OK || response.Payload == nil {
-		c.Fail()
+		t.Fail()
 	}
 
 	ass := ContratAssurance{}
 	_ = json.Unmarshal(response.Payload, &ass)
 
-	if ass.IdContrat != idContrat {
-		c.Fail()
+	if ass.UUID != uuid {
+		t.Fail()
 	}
 }
 
-func TestCreateContratAssurance(c *testing.T) {
+func TestCreateContratAssurance(t *testing.T) {
 	scc := new(ProjetAssurance)
 	stub := shim.NewMockStub("ex02", scc)
 
-	checkCreateNewContratAssurance(c, stub, "O0", "00", "00", "01012020", "01062020", "xxxxxx", "00", "00")
-	/* checkCreateNewOrganization(c, stub, "O0", "00", "00", "01012020", "01062020", "xxxxxx", "00", "00") */
+	checkCreateNewContratAssurance(t, stub, "O0", "00", "00", "01012020", "01062020", "xxxxxx", "00", "00")
+	checkGetExistingContratAssurance(t, stub, "O0")
+	checkCreateNewContratAssurance(t, stub, "O0", "00", "00", "01012020", "01062020", "xxxxxx", "00", "00")
 }
 
-func TestGetContratAssuranceByKey(a *testing.T) {
+func TestGetContratAssuranceByKey(t *testing.T) {
 	scc := new(ProjetAssurance)
 	stub := shim.NewMockStub("ex02", scc)
 
-	checkCreateNewContratAssurance(a, stub, "O0", "00", "00", "01012020", "01062020", "xxxxxx", "00", "00")
-	checkGetExistingContratAssurance(a, stub, "O0")
+	checkCreateNewContratAssurance(t, stub, "O0", "00", "00", "01012020", "01062020", "xxxxxx", "00", "00")
+	checkGetExistingContratAssurance(t, stub, "O0")
 }

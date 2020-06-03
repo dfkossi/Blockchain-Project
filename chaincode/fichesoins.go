@@ -11,14 +11,14 @@ import (
 //FicheSoins declaration of struct
 type FicheSoins struct {
 	ObjectType            string
-	IdFiche               string
-	IdContrat             string
-	IdCompagnieAssurance  string
-	IdHopital             string
+	UUID                  string
+	IDContrat             string
+	IDCompagnieAssurance  string
+	IDHopital             string
 	CodeAcheteurAssurance string
 	DateDebut             string
 	DateFin               string
-	FichieSoinsPDF        string
+	FicheSoinsPDF         string
 	SignatureAcheteur     string
 	SignatureCompagnie    string
 	signatureHopital      string
@@ -37,53 +37,60 @@ func makeBytesFromAsset(stub shim.ChaincodeStubInterface, ficheSoins FicheSoins)
 	return bytes
 }
 
-func CreateFicheSoinsOnLedger(stub shim.ChaincodeStubInterface, objectType string, idFiche string, idContrat string,
-	idCompagnieAssurance string, idHopital string, codeAcheteurAssurance string, dateDebut string, dateFin string,
-	FichieSoinsPDF string, signatureAcheteur string, signatureCompagnie string, signatureHopital string) []byte {
+//CreateFicheSoinsOnLedger to create an FicheSoins on ledger
+func CreateFicheSoinsOnLedger(stub shim.ChaincodeStubInterface, objectType string, uuid string, iDContrat string,
+	iDCompagnieAssurance string, iDHopital string, codeAcheteurAssurance string, dateDebut string, dateFin string,
+	ficheSoinsPDF string, signatureAcheteur string, signatureCompagnie string, signatureHopital string) []byte {
 
-	ficheSoins := FicheSoins{objectType, idFiche, idContrat, idCompagnieAssurance, idHopital, codeAcheteurAssurance,
-		dateDebut, dateFin, FichieSoinsPDF, signatureAcheteur, signatureCompagnie, signatureHopital}
+	ficheSoins := FicheSoins{objectType, uuid, iDContrat, iDCompagnieAssurance, iDHopital, codeAcheteurAssurance,
+		dateDebut, dateFin, ficheSoinsPDF, signatureAcheteur, signatureCompagnie, signatureHopital}
 
 	ficheSoinsAsJSONBytes := makeBytesFromAsset(stub, ficheSoins)
 
-	uuidIdexKeyFicheSoins := createIndexKey(stub, idFiche, "asset")
+	uuidIdexKeyFicheSoins := createIndexKey(stub, uuid, "fichesoins")
+
 	putEntityInLedger(stub, uuidIdexKeyFicheSoins, ficheSoinsAsJSONBytes)
 	return ficheSoinsAsJSONBytes
 }
 
-func (f *FicheSoins) CreateFicheSoins(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+//CreateFicheSoins Core creation
+func (t *FicheSoins) CreateFicheSoins(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	idFiche := args[0]
-	idCompagnieAssurance := args[0]
-	idContrat := args[0]
-	idHopital := args[0]
-	codeAcheteurAssurance := args[0]
-	dateDebut := args[0]
-	dateFin := args[0]
-	fichieSoinsPDF := args[0]
-	signatureAcheteur := args[0]
-	signatureCompagnie := args[0]
-	signatureHopital := args[0]
+	uuid := args[0]
+	iDCompagnieAssurance := args[1]
+	iDContrat := args[2]
+	iDHopital := args[3]
+	codeAcheteurAssurance := args[4]
+	dateDebut := args[5]
+	dateFin := args[6]
+	ficheSoinsPDF := args[7]
+	signatureAcheteur := args[8]
+	signatureCompagnie := args[9]
+	signatureHopital := args[10]
 
-	uuidIndexKeyFicheSoins := createIndexKey(stub, idFiche, "FicheSoins")
-	ficheSoins := CreateFicheSoinsOnLedger(stub, "FicheSoins",
-		uuidIndexKeyFicheSoins, idCompagnieAssurance, idContrat, idHopital, codeAcheteurAssurance,
-		dateDebut, dateFin, fichieSoinsPDF, signatureAcheteur, signatureCompagnie, signatureHopital)
+	uuidIndexKeyFicheSoins := createIndexKey(stub, uuid, "fichesoins")
+	if checkEntityExist(stub, uuidIndexKeyFicheSoins) == true {
+		return entityAlreadyExistMessage(stub, uuid, "fichesoins")
+	}
 
-	return succeed(stub, "Fiche Soins Created", ficheSoins)
+	ficheSoins := CreateFicheSoinsOnLedger(stub, "fichesoins",
+		uuid, iDCompagnieAssurance, iDContrat, iDHopital, codeAcheteurAssurance,
+		dateDebut, dateFin, ficheSoinsPDF, signatureAcheteur, signatureCompagnie, signatureHopital)
+
+	return succeed(stub, "FicheSoinsCreated", ficheSoins)
 }
 
-//GetFicheSoinsByID method to get an asset by id
-func (f *FicheSoins) GetFicheSoinsByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
+//GetFicheSoinsByID method to get an ficheSoins by id
+func (t *FicheSoins) GetFicheSoinsByID(stub shim.ChaincodeStubInterface, args string) pb.Response {
 	fmt.Println("\n GetFicheSoinsByID - Start", args)
 
 	uuid := args
 
-	uuidIndexKey := createIndexKey(stub, uuid, "asset")
+	uuidIndexKey := createIndexKey(stub, uuid, "fichesoins")
 	if checkEntityExist(stub, uuidIndexKey) == false {
-		return entityNotFoundMessage(stub, uuid, "asset")
+		return entityNotFoundMessage(stub, uuid, "fichesoins")
 	}
-	assetAsBytes := getEntityFromLedger(stub, uuidIndexKey)
+	ficheSoinsAsBytes := getEntityFromLedger(stub, uuidIndexKey)
 
-	return shim.Success(assetAsBytes)
+	return shim.Success(ficheSoinsAsBytes)
 }
