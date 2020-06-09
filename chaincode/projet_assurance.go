@@ -52,12 +52,18 @@ func (t *ProjetAssurance) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	case strings.Compare(fc, "GetCompagnieAssuranceByID") == 0:
 		return t.compagnieAssurance.GetCompagnieAssuranceByID(stub, args[0])
 
+	case strings.Compare(fc, "UpdateCompagnieAssuranceByID") == 0:
+		return t.compagnieAssurance.UpdateCompagnieAssuranceByID(stub, args)
+
+	case strings.Compare(fc, "UnregisterCompagnieAssuranceByID") == 0:
+		return t.compagnieAssurance.UnregisterCompagnieAssuranceByID(stub, args)
+
 	// ACHETEURASSURANCE
 	case strings.Compare(fc, "CreateAcheteurAssurance") == 0:
 		return t.acheteurAssurance.CreateAcheteurAssurance(stub, args)
 
-	/*case strings.Compare(fc, "GetAcheteurAssuranceByID") == 0:
-	return t.acheteurAssurance.GetAcheteurAssuranceByID(stub, args[0])*/
+	case strings.Compare(fc, "GetAcheteurAssuranceByID") == 0:
+		return t.acheteurAssurance.GetAcheteurAssuranceByID(stub, args[0])
 
 	// CONTRATASSURANCE
 	case strings.Compare(fc, "CreateContratAssurance") == 0:

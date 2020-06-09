@@ -55,7 +55,7 @@ func (t *AcheteurAssurance) CreateAcheteurAssurance(stub shim.ChaincodeStubInter
 	passportid := args[4]
 	visaid := args[5]
 
-	uuidIndexKeyAcheteurAssurance := createIndexKey(stub, uuid, "AcheteurAssurance")
+	uuidIndexKeyAcheteurAssurance := createIndexKey(stub, uuid, "acheteurassurance")
 	if checkEntityExist(stub, uuidIndexKeyAcheteurAssurance) == true {
 		return entityAlreadyExistMessage(stub, uuid, "acheteurassurance")
 	}
@@ -72,9 +72,9 @@ func (t *AcheteurAssurance) GetAcheteurAssuranceByID(stub shim.ChaincodeStubInte
 
 	uuid := args
 
-	uuidIndexKey := createIndexKey(stub, uuid, "acheteurAssurance")
+	uuidIndexKey := createIndexKey(stub, uuid, "acheteurassurance")
 	if checkEntityExist(stub, uuidIndexKey) == false {
-		return entityNotFoundMessage(stub, uuid, "acheteurAssurance")
+		return entityNotFoundMessage(stub, uuid, "acheteurassurance")
 	}
 	acheteurAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
 

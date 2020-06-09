@@ -78,3 +78,53 @@ func (t *CompagnieAssurance) GetCompagnieAssuranceByID(stub shim.ChaincodeStubIn
 
 	return shim.Success(compagnieAssuranceAsBytes)
 }
+
+//UpdateCompagnieAssuranceByID method to update an compagnieassurance by id
+func (t *CompagnieAssurance) UpdateCompagnieAssuranceByID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	fmt.Println("\n UpdateCompagnieAssuranceByID - Start")
+
+	uuid := args[0]
+	newNom := args[1]
+	newContact := args[2]
+	newAdresse := args[3]
+
+	uuidIndexKey := createIndexKey(stub, uuid, "compagnieassurance")
+	if checkEntityExist(stub, uuidIndexKey) == false {
+		return entityNotFoundMessage(stub, uuid, "compagnieassurance")
+	}
+	compagnieAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
+	compagnieassurance := makeCompagnieAssuranceFromBytes(stub, compagnieAssuranceAsBytes)
+
+	compagnieassurance.Nom = newNom
+	compagnieassurance.Contact = newContact
+	compagnieassurance.Adresse = newAdresse
+
+	compagnieAssuranceAsJSONBytes := makeBytesFromCompagnieAssurance(stub, compagnieassurance)
+
+	putEntityInLedger(stub, uuidIndexKey, compagnieAssuranceAsJSONBytes)
+	return succeed(stub, "CompagnieAssuranceUpdatedEvent", compagnieAssuranceAsJSONBytes)
+
+}
+
+//UnregisterCompagnieAssuranceByID method to unregister an compagnieassurance by id
+func (t *CompagnieAssurance) UnregisterCompagnieAssuranceByID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	fmt.Println("\n UnregisterCompagnieAssuranceByID - Start")
+	uuid := args[0]
+
+	uuidIndexKey := createIndexKey(stub, uuid, "compagnieassurance")
+	if checkEntityExist(stub, uuidIndexKey) == false {
+		return entityNotFoundMessage(stub, uuid, "compagnieassurance")
+	}
+	compagnieAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
+
+	if compagnieAssuranceAsBytes == nil {
+		fmt.Println("Impossible to delete non-existent compagnieassurance")
+		return entityNotFoundMessage(stub, uuid, "compagnieassurance")
+	}
+
+	//delete compagnieassurance
+	deleteEntityFromLedger(stub, uuidIndexKey)
+
+	fmt.Println("CompagnieAssurance " + uuid + " was unregistered successfully")
+	return succeed(stub, "organizationUnregisteredEvent", []byte("{\"OrganizationUUID\":\""+uuid+"\"}"))
+}

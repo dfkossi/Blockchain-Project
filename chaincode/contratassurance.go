@@ -12,7 +12,7 @@ import (
 type ContratAssurance struct {
 	ObjectType            string
 	UUID                  string
-	IDCompagnieAssurance  string
+	IDCompagnieAssurance  CompagnieAssurance
 	CodeAcheteurAssurance string
 	DateDebut             string
 	DateFin               string
@@ -36,7 +36,7 @@ func makeBytesFromContratAssurance(stub shim.ChaincodeStubInterface, contratAssu
 
 //CreateContratAssuranceOnLedger to create an CompagnieAssurance on ledger
 func CreateContratAssuranceOnLedger(stub shim.ChaincodeStubInterface, objectType string, uuid string,
-	iDCompagnieAssurance string, codeAcheteurAssurance string, dateDebut string,
+	iDCompagnieAssurance CompagnieAssurance, codeAcheteurAssurance string, dateDebut string,
 	dateFin string, contratAssurancePDF string, signatureAcheteur string, signatureCompagnie string) []byte {
 
 	contratAssurance := ContratAssurance{objectType, uuid, iDCompagnieAssurance, codeAcheteurAssurance,
@@ -66,8 +66,15 @@ func (t *ContratAssurance) CreateContratAssurance(stub shim.ChaincodeStubInterfa
 		return entityAlreadyExistMessage(stub, uuid, "contratassurance")
 	}
 
+	uuidIndexKeyCompagnieAssurance := createIndexKey(stub, iDCompagnieAssurance, "compagnieassurance")
+	if checkEntityExist(stub, uuidIndexKeyCompagnieAssurance) == true {
+		return entityAlreadyExistMessage(stub, iDCompagnieAssurance, "compagnieassurance")
+	}
+	compagnieAssurance := getEntityFromLedger(stub, uuidIndexKeyCompagnieAssurance)
+	compagnieAssuranceAsJSONBytes := makeCompagnieAssuranceFromBytes(stub, compagnieAssurance)
+
 	contratAssurance := CreateContratAssuranceOnLedger(stub, "contratassurance",
-		uuid, iDCompagnieAssurance, codeAcheteurAssurance, dateDebut, dateFin,
+		uuid, compagnieAssuranceAsJSONBytes, codeAcheteurAssurance, dateDebut, dateFin,
 		contratAssurancePDF, signatureAcheteur, signatureCompagnie)
 
 	return succeed(stub, "ContratAssuranceCreated", contratAssurance)
@@ -86,4 +93,31 @@ func (t *ContratAssurance) GetContratAssuranceByID(stub shim.ChaincodeStubInterf
 	contratAssuranceAsBytes := getEntityFromLedger(stub, uuidIndexKey)
 
 	return shim.Success(contratAssuranceAsBytes)
+}
+
+//UpdateCompagnieAssuranceByID method to update an compagnieassurance by id
+func (t *ContratAssurance) UpdateCompagnieAssuranceByID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	fmt.Println("\n UpdateCompagnieAssuranceByID - Start")
+
+	uuid := args[0]
+	newNom := args[1]
+	newContact := args[2]
+	newAdresse := args[3]
+
+	uuidIndexKey := createIndexKey(stub, uuid, "contratassurance")
+	if checkEntityExist(stub, uuidIndexKey) == false {
+		return entityNotFoundMessage(stub, uuid, "contratassurance")
+	}
+	organizationAsBytes := getEntityFromLedger(stub, uuidIndexKey)
+	contratassurance := makeCompagnieAssuranceFromBytes(stub, organizationAsBytes)
+
+	contratassurance.Nom = newNom
+	contratassurance.Contact = newContact
+	contratassurance.Adresse = newAdresse
+
+	compagnieAssuranceAsJSONBytes := makeBytesFromCompagnieAssurance(stub, contratassurance)
+
+	putEntityInLedger(stub, uuidIndexKey, compagnieAssuranceAsJSONBytes)
+	return succeed(stub, "CompagnieAssuranceUpdatedEvent", compagnieAssuranceAsJSONBytes)
+
 }
